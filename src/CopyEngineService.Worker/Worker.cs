@@ -1,23 +1,17 @@
 namespace CopyEngineService.Worker;
 
-public class Worker : BackgroundService
+public sealed class Worker(ILogger<Worker> logger) : BackgroundService
 {
-    private readonly ILogger<Worker> _logger;
-
-    public Worker(ILogger<Worker> logger)
-    {
-        _logger = logger;
-    }
-
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        logger.LogInformation("CopyEngineService.Worker started at {TimeUtc}", DateTime.UtcNow);
+
         while (!stoppingToken.IsCancellationRequested)
         {
-            if (_logger.IsEnabled(LogLevel.Information))
-            {
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-            }
-            await Task.Delay(1000, stoppingToken);
+            logger.LogInformation("CopyEngineService.Worker heartbeat at {TimeUtc}", DateTime.UtcNow);
+            await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
         }
+
+        logger.LogInformation("CopyEngineService.Worker stopped at {TimeUtc}", DateTime.UtcNow);
     }
 }
