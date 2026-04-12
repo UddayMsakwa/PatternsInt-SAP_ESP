@@ -1,0 +1,67 @@
+version: "3.9"
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: sap-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  postgres-trader:
+    image: postgres:16
+    container_name: postgres-trader
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: traderdb
+    ports:
+      - "5433:5432"
+
+  postgres-subscription:
+    image: postgres:16
+    container_name: postgres-subscription
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: subscriptiondb
+    ports:
+      - "5434:5432"
+
+  postgres-accounting:
+    image: postgres:16
+    container_name: postgres-accounting
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: accountingdb
+    ports:
+      - "5435:5432"
+
+  postgres-eps:
+    image: postgres:16
+    container_name: postgres-eps
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: epsdb
+    ports:
+      - "5436:5432"
+
+  postgres-ces:
+    image: postgres:16
+    container_name: postgres-ces
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: cesdb
+    ports:
+      - "5437:5432"
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: sap-jaeger
+    ports:
+      - "16686:16686"
+      - "4317:4317"
+      - "4318:4318"
