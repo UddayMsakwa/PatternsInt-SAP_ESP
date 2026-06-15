@@ -1,7 +1,13 @@
+using Microsoft.EntityFrameworkCore;
+using SubscriptionService.Api.Persistence;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddDbContext<SubscriptionDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("SubscriptionDb")));
 
 var app = builder.Build();
 
