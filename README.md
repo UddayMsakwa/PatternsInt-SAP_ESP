@@ -1,125 +1,292 @@
-# PatternsInt-SAP_ESP
+&#x20;SAP Copy Trading Platform
 
-Simplified copy trading platform backend for the SAP / Enterprise Systems Patterns task.
 
-## Overview
 
-This repository contains a microservice-based simulation of a copy trading backend.
+&#x20;Overview
 
-The system includes:
 
-- Trader Service
-- Subscription Service
-- Accounting Service
-- Exchange Proxy Service
-- Copy Engine Service
-- Shared Contracts
-- Shared Infrastructure
 
-## Architecture
+This project is a simplified backend implementation of a copy trading platform for the Patterns and Integration assignment.
 
-Trader Service receives and stores trader signals. Subscription Service stores follower subscriptions. Copy Engine Service simulates a saga that copies trades for followers. Exchange Proxy Service simulates exchange execution. Accounting Service simulates balances, positions, and ledger entries.
 
-## Patterns Demonstrated
 
-- Microservices
-- Outbox Pattern
-- Saga Pattern
-- Event Sourcing concept
-- CQRS concept
-- Exchange Proxy isolation
-- Docker-based infrastructure preparation
+The system simulates how a trader's trade signal can be copied to follower accounts through a set of cooperating services.
 
-See:
 
-- `docs/Architecture.md`
-- `docs/Patterns.md`
-- `docs/TestingAndResults.md`
 
-## Build
+The implementation focuses on demonstrating architectural and integration patterns rather than building a real brokerage system.
 
-```powershell
-dotnet restore .\PatternsInt-SAP_ESP.sln
-dotnet build .\PatternsInt-SAP_ESP.sln
+
+
+&#x20;Services
+
+
+
+The solution contains the following services:
+
+
+
+&#x20;Trader Service
+
+
+
+Responsible for trader-related data and trade signal handling.
+
+
+
+&#x20;Subscription Service
+
+
+
+Responsible for managing follower subscriptions to trader accounts.
+
+
+
+&#x20;Copy Engine Service
+
+
+
+A background worker that simulates the copy trading saga. It processes trade copy logic and represents the orchestration part of the system.
+
+
+
+&#x20;Exchange Proxy Service
+
+
+
+A simulated exchange service. It accepts execution requests and returns simulated execution results.
+
+
+
+&#x20;Accounting Service
+
+
+
+A simulated accounting service. It exposes account, position, and ledger endpoints.
+
+
+
+&#x20;Shared Contracts
+
+
+
+Contains common DTOs, event contracts, command/query objects, and shared message structures.
+
+
+
+&#x20;Shared Infrastructure
+
+
+
+Contains common infrastructure helpers and extension points.
+
+
+
+&#x20;Architecture
+
+
+
+The simplified architecture is:
+
+
+
+text
+
+Trader Service
+
+&#x20;     |
+
+&#x20;     v
+
+Subscription Service
+
+&#x20;     |
+
+&#x20;     v
+
+Copy Engine Service
+
+&#x20;     |
+
+&#x20;     +----> Exchange Proxy Service
+
+&#x20;     |
+
+&#x20;     +----> Accounting Service
+
+
+
+
+
+The system is implemented as multiple .NET services with separate responsibilities.
+
+
+
+&#x20;Patterns Demonstrated
+
+
+
+The project demonstrates the following patterns:
+
+
+
+| Pattern               | Where Used                                                | Purpose                                                       |
+
+| --------------------- | --------------------------------------------------------- | ------------------------------------------------------------- |
+
+| Saga                  | Copy Engine Service                                       | Coordinates the simulated copy trading workflow.              |
+
+| Outbox                | Trader and Subscription services                          | Stores integration-style messages together with local data.   |
+
+| Event Sourcing        | Shared event store records and service history structures | Represents important business changes as events.              |
+
+| CQRS                  | Shared command and query contracts                        | Separates write operations from read operations.              |
+
+| Service Decomposition | All services                                              | Splits the system into independently understandable services. |
+
+| Exchange Proxy        | Exchange Proxy Service                                    | Simulates external exchange integration.                      |
+
+
+
+&#x20;Technology Stack
+
+
+
+\* .NET 8
+
+\* ASP.NET Core Web API
+
+\* .NET Worker Service
+
+\* Entity Framework Core
+
+\* PostgreSQL-ready configuration
+
+\* Docker Compose infrastructure
+
+\* Locust load testing
+
+\* Jaeger prepared for tracing
+
+
+
+&#x20;Build
+
+
+
+From the repository root:
+
+
+
+powershell
+
+dotnet restore .\\PatternsInt-SAP\_ESP.sln
+
+dotnet build .\\PatternsInt-SAP\_ESP.sln
+
+
+
+
+
+&#x20;Run Services
+
+
+
+Run each service in a separate PowerShell window.
+
+
+
+powershell
+
+dotnet run --project .\\src\\SubscriptionService.Api
+
+dotnet run --project .\\src\\AccountingService.Api
+
+dotnet run --project .\\src\\ExchangeProxyService.Api
+
+dotnet run --project .\\src\\CopyEngineService.Worker
+
 ```
 
-## Run Services
 
-Open separate PowerShell windows and run:
 
-```powershell
-dotnet run --project .\src\SubscriptionService.Api
-```
+&#x20;Smoke Testing
 
-```powershell
-dotnet run --project .\src\AccountingService.Api
-```
 
-```powershell
-dotnet run --project .\src\ExchangeProxyService.Api
-```
 
-```powershell
-dotnet run --project .\src\CopyEngineService.Worker
-```
+Smoke testing can be executed with:
 
-Optional Trader Service:
 
-```powershell
-dotnet run --project .\src\TraderService.Api
-```
 
-## Default Local Ports
+powershell
 
-| Service | URL |
-|---|---|
-| Trader Service | `http://localhost:5031` |
-| Subscription Service | `http://localhost:5224` |
-| Accounting Service | `http://localhost:5222` |
-| Exchange Proxy Service | `http://localhost:5021` |
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
-## Smoke Test
+.\\scripts\\smoke-test.ps1
 
-After starting Subscription, Accounting, and Exchange Proxy services, run:
 
-```powershell
-.\scripts\smoke-test.ps1
-```
 
-## Load Testing
 
-Install Locust:
 
-```powershell
-pip install locust
-```
+&#x20;Load Testing
 
-Run Subscription Service load test:
 
-```powershell
-locust -f .\load-tests\subscription_locustfile.py --host=http://localhost:5224
-```
 
-Run Accounting Service load test:
+Load testing was performed using Locust.
 
-```powershell
-locust -f .\load-tests\accounting_locustfile.py --host=http://localhost:5222
-```
 
-Run Exchange Proxy Service load test:
 
-```powershell
-locust -f .\load-tests\exchange_locustfile.py --host=http://localhost:5021
-```
+Example:
 
-Open `http://localhost:8089`, use 50 users and spawn rate 5 users per second for the local demonstration.
 
-## Docker Infrastructure
 
-The repository includes Docker Compose for RabbitMQ, PostgreSQL, and Jaeger:
+powershell
 
-```powershell
-docker compose up -d
-```
+\& "C:\\Users\\udday\\AppData\\Roaming\\Python\\Python313\\Scripts\\locust.exe" -f .\\load-tests\\subscription\_locustfile.py --host=http://localhost:5224
 
-The final demonstration uses simulated service behavior so the main test endpoints can be verified quickly on a local machine.
+
+
+
+
+Locust files are stored in:
+
+
+
+text
+
+load-tests/
+
+
+
+
+
+&#x20;Testing Evidence
+
+
+
+Testing documentation and screenshots are stored in:
+
+
+
+text
+
+docs/TestingAndResults.md
+
+docs/testing/screenshots/
+
+
+
+
+
+&#x20;Notes
+
+
+
+This implementation is a local simulated version of a copy trading backend. It demonstrates the required architecture and patterns, but it does not claim to be a production-ready brokerage system.
+
+
+
+A production version would require real message broker communication, stronger persistence guarantees, distributed deployment, authentication, account reconciliation, risk checks, monitoring, and extended load testing.
+
+
+
