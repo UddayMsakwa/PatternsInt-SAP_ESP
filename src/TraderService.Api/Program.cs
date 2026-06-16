@@ -11,7 +11,6 @@ builder.Services.AddDbContext<TraderDbContext>(options =>
 
 var app = builder.Build();
 
-app.UseHttpsRedirection();
 app.MapControllers();
 
 app.MapGet("/", () => Results.Ok(new

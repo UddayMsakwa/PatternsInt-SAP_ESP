@@ -2,9 +2,9 @@
 
 Simplified copy trading platform backend for the SAP / Enterprise Systems Patterns task.
 
-## Project goal
+## Overview
 
-This repository contains a microservice-based backend for a simplified copy trading platform.
+This repository contains a microservice-based simulation of a copy trading backend.
 
 The system includes:
 
@@ -13,42 +13,113 @@ The system includes:
 - Accounting Service
 - Exchange Proxy Service
 - Copy Engine Service
+- Shared Contracts
+- Shared Infrastructure
 
-## Planned architecture
+## Architecture
 
-Services communicate asynchronously through an event bus.
+Trader Service receives and stores trader signals. Subscription Service stores follower subscriptions. Copy Engine Service simulates a saga that copies trades for followers. Exchange Proxy Service simulates exchange execution. Accounting Service simulates balances, positions, and ledger entries.
 
-Planned supporting infrastructure:
+## Patterns Demonstrated
 
-- RabbitMQ
-- PostgreSQL
-- Jaeger
-- Docker Compose
+- Microservices
+- Outbox Pattern
+- Saga Pattern
+- Event Sourcing concept
+- CQRS concept
+- Exchange Proxy isolation
+- Docker-based infrastructure preparation
 
-## Branch strategy
+See:
 
-- main - final stable version
-- develop - integration branch
-- eature/dayX-* - feature branches for daily progress
+- `docs/Architecture.md`
+- `docs/Patterns.md`
+- `docs/TestingAndResults.md`
 
-## Day 1 scope
+## Build
 
-- Create solution structure
-- Create service skeletons
-- Add shared projects
-- Add Docker Compose foundation
-- Add documentation folders
-- Prepare repository for implementation
+```powershell
+dotnet restore .\PatternsInt-SAP_ESP.sln
+dotnet build .\PatternsInt-SAP_ESP.sln
+```
 
-## Planned deliverables
+## Run Services
 
-- Service data schemas
-- Happy path and failure path dynamic diagrams
-- Pattern analysis table
-- Load testing scripts
-- Final performance summary
+Open separate PowerShell windows and run:
 
-## How to run infrastructure only
+```powershell
+dotnet run --project .\src\SubscriptionService.Api
+```
 
-`powershell
+```powershell
+dotnet run --project .\src\AccountingService.Api
+```
+
+```powershell
+dotnet run --project .\src\ExchangeProxyService.Api
+```
+
+```powershell
+dotnet run --project .\src\CopyEngineService.Worker
+```
+
+Optional Trader Service:
+
+```powershell
+dotnet run --project .\src\TraderService.Api
+```
+
+## Default Local Ports
+
+| Service | URL |
+|---|---|
+| Trader Service | `http://localhost:5031` |
+| Subscription Service | `http://localhost:5224` |
+| Accounting Service | `http://localhost:5222` |
+| Exchange Proxy Service | `http://localhost:5021` |
+
+## Smoke Test
+
+After starting Subscription, Accounting, and Exchange Proxy services, run:
+
+```powershell
+.\scripts\smoke-test.ps1
+```
+
+## Load Testing
+
+Install Locust:
+
+```powershell
+pip install locust
+```
+
+Run Subscription Service load test:
+
+```powershell
+locust -f .\load-tests\subscription_locustfile.py --host=http://localhost:5224
+```
+
+Run Accounting Service load test:
+
+```powershell
+locust -f .\load-tests\accounting_locustfile.py --host=http://localhost:5222
+```
+
+Run Exchange Proxy Service load test:
+
+```powershell
+locust -f .\load-tests\exchange_locustfile.py --host=http://localhost:5021
+```
+
+Open `http://localhost:8089`, use 50 users and spawn rate 5 users per second for the local demonstration.
+
+## Docker Infrastructure
+
+The repository includes Docker Compose for RabbitMQ, PostgreSQL, and Jaeger:
+
+```powershell
 docker compose up -d
+```
+
+The final demonstration uses simulated service behavior so the main test endpoints can be verified quickly on a local machine.

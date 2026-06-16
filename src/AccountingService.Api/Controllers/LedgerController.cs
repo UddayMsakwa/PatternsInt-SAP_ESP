@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using AccountingService.Api.Domain;
+using Microsoft.AspNetCore.Mvc;
+using AccountingService.Api.Infrastructure;
 
 namespace AccountingService.Api.Controllers;
 
@@ -7,11 +7,20 @@ namespace AccountingService.Api.Controllers;
 [Route("api/ledger")]
 public sealed class LedgerController : ControllerBase
 {
-    private static readonly List<LedgerEntry> Entries = [];
-
     [HttpGet]
     public IActionResult Get()
     {
-        return Ok(Entries);
+        return Ok(AccountingState.LedgerEntries);
+    }
+
+    [HttpGet("{accountNumber}")]
+    public IActionResult GetByAccountNumber(string accountNumber)
+    {
+        var entries = AccountingState.LedgerEntries
+            .Where(x => x.AccountNumber.Equals(accountNumber, StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(x => x.CreatedAtUtc)
+            .ToList();
+
+        return Ok(entries);
     }
 }
